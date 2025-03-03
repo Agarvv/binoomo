@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { testDatabase } from './config/database';
+import { testDatabase } from './config/database.js';
 
 
 dotenv.config();
