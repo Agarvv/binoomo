@@ -10,7 +10,7 @@ console.log("DB_NAME:", process.env.DB_NAME);
 import { testDatabase } from './config/database.js';
 
 import session from 'express-session';
-import passport from './services/passport.js';
+import passport from './services/auth/passport.js'
 
 
 const app = express();

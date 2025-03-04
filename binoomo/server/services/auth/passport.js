@@ -2,7 +2,7 @@
 import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { pool } from '../../config/database.js';
+import pool from '../../config/database.js'
 import { findUserBy } from './AuthService.js'
 
 

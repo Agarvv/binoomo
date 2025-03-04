@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import passport from './passport.js';
-import { pool } from '../../config/database.js';
+import pool from '../../config/database.js'
 import { generateJwt } from './JwtService.js'
 
 export const register = async (username, email, password) => {
