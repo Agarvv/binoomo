@@ -17,13 +17,21 @@ export const register = async (username, email, password) => {
 
 
 export const login = async (req, res, next) => {
+    // Passport handles this with callbacks, so i have to use Promises
     return new Promise((resolve, reject) => {
+        // try to authenticate the user
         passport.authenticate('local', (err, user, info) => {
+            
             if (err) return reject(err);  
-
+            
+            // try login user
             req.logIn(user, (err) => {
                 if (err) return reject(err); 
-
+                
+                // if login successfull, generate jwt and return jwt.
+                // passport will set the user object in req.user if the login is successfull
+                // and we will have access to req.isAuthenticated to see if the user is authenticated
+                // thats why passport is so powerfull.
                 const jwtPayload = {
                     userId: user.user_id,
                     email: user.email,
@@ -31,7 +39,7 @@ export const login = async (req, res, next) => {
                 };
 
                 const jwt = generateJwt(jwtPayload);  
-
+ 
                 resolve(jwt);  
             });
         })(req, res, next);
@@ -59,6 +67,7 @@ export const makePassword = async (raw) => {
 };
 
 // find user BY email, username, id, etc
+// ex: findUserBy("userId", 5)
 export const findUserBy = async (by, value) => {
     try {
         const [rows] = await pool.query(`SELECT * FROM users WHERE ${by} = ?`, [value]);
