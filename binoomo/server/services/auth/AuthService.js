@@ -5,38 +5,39 @@ import { generateJwt } from './JwtService.js'
 
 export const register = async (username, email, password) => {
     
-        const userExists = await userExists(username, email);
+        const userExists = await verifyUserExists(username, email);
         
         // soon im gonna ad a custom exception 
         if (userExists) throw new Error('Username Or Email Exists already');
 
         const hashedPassword = await makePassword(password);
 
-        await pool.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
+        await pool.query('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', [username, email, hashedPassword]);
 };
 
 
-export const login = (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if (err) return next(err);
+export const login = async (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        passport.authenticate('local', (err, user, info) => {
+            if (err) return reject(err);  
 
-        if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+            req.logIn(user, (err) => {
+                if (err) return reject(err); 
 
-        req.logIn(user, (err) => {
-            if (err) return next(err);
-            
-            const jwtPayload = {
-                userId: user.id,
-                email: user.email,
-                username: user.username
-            }
-            
-            const jwt = generateJwt(jwtPayload);
-            
-            return res.json({ jwt });
-        });
-    })(req, res, next);
+                const jwtPayload = {
+                    userId: user.user_id,
+                    email: user.email,
+                    username: user.username
+                };
+
+                const jwt = generateJwt(jwtPayload);  
+
+                resolve(jwt);  
+            });
+        })(req, res, next);
+    });
 };
+
 
 
 export const comparePassword = async (rawPassword, encryptedPassword) => {
@@ -44,7 +45,7 @@ export const comparePassword = async (rawPassword, encryptedPassword) => {
         return await bcrypt.compare(rawPassword, encryptedPassword);
     } catch (err) {
         console.error("Error comparing passwords:", err);
-        throw err;
+        throw cerr;
     }
 };
 
@@ -68,9 +69,9 @@ export const findUserBy = async (by, value) => {
     }
 };
 
-export const userExists = async (username, email) => {
+export const verifyUserExists = async (username, email) => {
         const [rows] = await pool.query(
-            `SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1`, 
+            `SELECT user_id FROM users WHERE username = ? OR email = ? LIMIT 1`, 
             [username, email]
         );
         

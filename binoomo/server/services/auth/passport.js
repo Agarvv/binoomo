@@ -4,6 +4,7 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import pool from '../../config/database.js'
 import { findUserBy } from './AuthService.js'
+import { comparePassword } from './AuthService.js';
 
 
 passport.use(new LocalStrategy(
@@ -14,7 +15,7 @@ passport.use(new LocalStrategy(
             // soon im gonna ad a custom exception 
             if(user == null) throw new Error("User not found")
 
-            const match = await comparePassword(password, user.password);
+            const match = await comparePassword(password, user.password_hash);
             if (!match) {
                 return done(null, false, { message: 'Wrong Password.' });
             }
@@ -25,12 +26,13 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, user.user_id);
 });
 
 passport.deserializeUser(async (id, done) => {
 
-        const user = await findUserBy("id", id)
+        const user = await findUserBy("user_id", id)
+        console.log("deserialize user", user)
         done(null, user);
 });
 

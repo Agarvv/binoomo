@@ -1,5 +1,5 @@
-const express = require('express');
-const authRouter = require('./auth.js')
+import express from 'express'
+import authRouter from './auth.js'
 
 
 export const router = express.Router();
